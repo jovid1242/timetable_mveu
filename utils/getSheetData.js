@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { google } = require("googleapis");
 
-async function getSheetData(range, spreadsheetId) {
+async function getSheetData(range, spreadsheetId, selectedDay) {
   const sheets = google.sheets({ version: "v4", auth: process.env.API_KEY });
 
   try {
@@ -46,11 +46,16 @@ async function getSheetData(range, spreadsheetId) {
       }
       newData[row[0]].push(row);
     });
-
-    // console.log("Данные с понедельника до субботы текущей недели:", newData);
-    return newData;
+ 
+    if (selectedDay === 'all') { 
+      return newData;
+    } else { 
+      const selectedDayData = newData[selectedDay];
+      return selectedDayData ? { [selectedDay]: selectedDayData } : {};
+    }
   } catch (err) {
     console.error("Ошибка при получении данных:", err);
+    throw err; // Лучше пробросить ошибку дальше для обработки в вызывающем коде
   }
 }
 

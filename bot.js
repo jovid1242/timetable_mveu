@@ -5,6 +5,7 @@ const groupHandler = require("./handlers/groupHandlers");
 const getSheetData = require("./utils/getSheetData");
 
 const token = process.env.BOT_TOKEN;
+const clientUrl = process.env.CLIENT_URL;
 
 class Bot {
   init(polling = false) {
@@ -25,7 +26,7 @@ class Bot {
         const time = lesson[3];
         const subject = lesson[4];
         const teacher = lesson[5];
-        const room = lesson[6] || ""; // Если нет данных о комнате, оставляем пустую строку
+        const room = lesson[6] || "";
 
         if (
           time === undefined ||
@@ -36,25 +37,26 @@ class Bot {
           return "";
         }
 
-        return `${time}, <strong>${subject}</strong>, <u>${teacher}</u>, <u>${room}</u>`;
+        return `${time}, <strong>${subject}</strong>, <u>${teacher}</u>, <b>${room}</b>`;
       }
 
       let formattedData = "";
 
-      // Проходимся по каждому дню недели и форматируем записи
       for (const day in dataSheets) {
         formattedData += `<b>${day}</b>: \n`;
         const lessons = dataSheets[day];
         lessons.forEach((lesson, index) => {
           console.log(formatLesson(lesson));
-          const formattedLesson =
-            !formatLesson(lesson)
-              ? formatLesson(lesson)
-              : `${index + 1}) ${formatLesson(lesson)}\n`;
+          const formattedLesson = !formatLesson(lesson)
+            ? formatLesson(lesson)
+            : `${index + 1}) ${formatLesson(lesson)}\n`;
           formattedData += formattedLesson;
         });
         formattedData += "\n";
-      } 
+      }
+      formattedData += `<a href="${clientUrl}?range=${data[0]}&spreadsheetId=${
+        process.env[data[1]]
+      }">Посмотреть на сайте</a>`;
 
       return this.bot.sendMessage(chatId, formattedData, {
         parse_mode: "HTML",
@@ -67,12 +69,16 @@ class Bot {
 
       // start
       if (text === "/start") {
-        this.bot.sendMessage(chatId, "Хэйй!, не нужно запоминать даты и время – я всегда готов помочь тебе с информацией о предстоящих занятиях. Просто выбери команду, и я предоставлю тебе актуальное расписание", {
-          reply_markup: {
-            keyboard: getButtons(chatId),
-            resize_keyboard: true,
-          },
-        });
+        this.bot.sendMessage(
+          chatId,
+          "Хэйй! Добро пожаловать 🗓️, не нужно запоминать даты и время – я всегда готов помочь тебе с информацией о предстоящих занятиях. Просто выбери команду, и я предоставлю тебе актуальное расписание",
+          {
+            reply_markup: {
+              keyboard: getButtons(chatId),
+              resize_keyboard: true,
+            },
+          }
+        );
       }
 
       if (text === "курс 1") {
