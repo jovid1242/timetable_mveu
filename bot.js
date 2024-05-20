@@ -6,6 +6,7 @@ const getSheetData = require("./utils/getSheetData");
 
 const token = process.env.BOT_TOKEN;
 const clientUrl = process.env.CLIENT_URL;
+const url = process.env.APP_URL;
 
 class Bot {
   init(polling = false) {
