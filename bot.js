@@ -10,9 +10,9 @@ const clientUrl = process.env.CLIENT_URL;
 class Bot {
   init(polling = false) {
     this.bot = new TelegramBot(token, { polling });
-    // if (!polling) {
-    //   this.bot.setWebHook(`${url}/bot${token}`);
-    // }
+    if (!polling) {
+      this.bot.setWebHook(`${url}/bot${token}`);
+    }
     return this.bot;
   }
 
