@@ -22,7 +22,8 @@ class Bot {
       const data = msg.data.split("____");
       var chatId = msg.from.id;
 
-      const dataSheets = await getSheetData(data[0], process.env[data[1]]);
+      const dataSheets = await getSheetData(data[0], process.env[data[1]], 'all'); 
+      
       function formatLesson(lesson) {
         const time = lesson[3];
         const subject = lesson[4];
@@ -41,13 +42,12 @@ class Bot {
         return `${time}, <strong>${subject}</strong>, <u>${teacher}</u>, <b>${room}</b>`;
       }
 
-      let formattedData = "";
+      var formattedData = "";
 
       for (const day in dataSheets) {
         formattedData += `<b>${day}</b>: \n`;
         const lessons = dataSheets[day];
-        lessons.forEach((lesson, index) => {
-          console.log(formatLesson(lesson));
+        lessons.forEach((lesson, index) => { 
           const formattedLesson = !formatLesson(lesson)
             ? formatLesson(lesson)
             : `${index + 1}) ${formatLesson(lesson)}\n`;
@@ -57,7 +57,7 @@ class Bot {
       }
       formattedData += `<a href="${clientUrl}?range=${data[0]}&spreadsheetId=${
         process.env[data[1]]
-      }">Посмотреть на сайте</a>`;
+      }">Посмотреть на сайте</a>`; 
 
       return this.bot.sendMessage(chatId, formattedData, {
         parse_mode: "HTML",
