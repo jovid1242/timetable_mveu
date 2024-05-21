@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 
 const Bot = require("./bot");
-const getSheetData = require("./utils/getSheetData");
+const getSheetData = require("./utils/getSheetData"); 
 const PORT = process.env.PORT || 8112;
 
 const polling = process.env.APP_MODE === "local";
@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
 
 app.get("/group", async (req, res) => {
   try {
-    const { range, spreadsheetId, day } = req.query; 
+    const { range, spreadsheetId, day } = req.query;
     const data = await getSheetData(range, spreadsheetId, day);
     function removeEmptySlots(schedule) {
       for (let day in schedule) {

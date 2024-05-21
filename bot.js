@@ -3,6 +3,13 @@ const { getButtons } = require("./utils/buttons");
 const getSheetTitle = require("./utils/getGroupName");
 const groupHandler = require("./handlers/groupHandlers");
 const getSheetData = require("./utils/getSheetData");
+const {
+  addDataToJson,
+  findDataByChatId,
+  checkChatIdExists,
+  updateDataInJson,
+} = require("./utils/saveToJson");
+const formatRangeLesson = require("./utils/formatLesson");
 
 const token = process.env.BOT_TOKEN;
 const clientUrl = process.env.CLIENT_URL;
@@ -22,46 +29,37 @@ class Bot {
       const data = msg.data.split("____");
       var chatId = msg.from.id;
 
-      const dataSheets = await getSheetData(data[0], process.env[data[1]], 'all'); 
-      
-      function formatLesson(lesson) {
-        const time = lesson[3];
-        const subject = lesson[4];
-        const teacher = lesson[5];
-        const room = lesson[6] || "";
+      if (data[0] === "course") {
+        if (checkChatIdExists(chatId)) {
+          updateDataInJson(chatId, {
+            spreadsheetId: process.env[data[1]],
+          });
 
-        if (
-          time === undefined ||
-          subject === undefined ||
-          teacher === undefined ||
-          room === undefined
-        ) {
-          return "";
+          const groups = await getSheetTitle(process.env[data[1]]);
+          const res = groupHandler.handleShowGroups(groups, data[1]);
+          return await this.bot.sendMessage(chatId, res.text, res.buttons);
         }
+      } else {
+        if (checkChatIdExists(chatId)) {
+          updateDataInJson(chatId, {
+            range: data[0],
+          });
 
-        return `${time}, <strong>${subject}</strong>, <u>${teacher}</u>, <b>${room}</b>`;
+          const dataSheets = await getSheetData(
+            data[0],
+            process.env[data[1]],
+            "all"
+          );
+
+          return this.bot.sendMessage(
+            chatId,
+            formatRangeLesson(data[0], process.env[data[1]], dataSheets),
+            {
+              parse_mode: "HTML",
+            }
+          );
+        }
       }
-
-      var formattedData = "";
-
-      for (const day in dataSheets) {
-        formattedData += `<b>${day}</b>: \n`;
-        const lessons = dataSheets[day];
-        lessons.forEach((lesson, index) => { 
-          const formattedLesson = !formatLesson(lesson)
-            ? formatLesson(lesson)
-            : `${index + 1}) ${formatLesson(lesson)}\n`;
-          formattedData += formattedLesson;
-        });
-        formattedData += "\n";
-      }
-      formattedData += `<a href="${clientUrl}?range=${data[0]}&spreadsheetId=${
-        process.env[data[1]]
-      }">Посмотреть на сайте</a>`; 
-
-      return this.bot.sendMessage(chatId, formattedData, {
-        parse_mode: "HTML",
-      });
     });
 
     this.bot.on("message", async (msg) => {
@@ -70,40 +68,123 @@ class Bot {
 
       // start
       if (text === "/start") {
-        this.bot.sendMessage(
-          chatId,
-          "Хэйй! Добро пожаловать 🗓️, не нужно запоминать даты и время – я всегда готов помочь тебе с информацией о предстоящих занятиях. Просто выбери команду, и я предоставлю тебе актуальное расписание",
-          {
-            reply_markup: {
-              keyboard: getButtons(chatId),
-              resize_keyboard: true,
+        if (!checkChatIdExists(chatId)) {
+          addDataToJson({
+            chatId,
+            detail: {
+              range: "",
+              spreadsheetId: "",
             },
-          }
-        );
+          });
+        }
+        const user = findDataByChatId(chatId);
+
+        if (
+          (!user?.detail?.range && !user?.detail?.spreadsheetId) ||
+          (user?.detail?.range === "" && user?.detail?.spreadsheetId === "")
+        ) {
+          const res = groupHandler.handleSelectCourse(chatId);
+          this.bot.sendMessage(chatId, res.text, res.buttons);
+        } else {
+          const dataSheets = await getSheetData(
+            user.detail.range,
+            user.detail.spreadsheetId,
+            "all"
+          );
+
+          return this.bot.sendMessage(
+            chatId,
+            formatRangeLesson(
+              user?.detail?.range,
+              user?.detail?.spreadsheetId,
+              dataSheets
+            ),
+            {
+              parse_mode: "HTML",
+              reply_markup: {
+                keyboard: getButtons(chatId),
+                resize_keyboard: true,
+              },
+            }
+          );
+        }
       }
 
-      if (text === "курс 1") {
-        const groups = await getSheetTitle(process.env.COURSE_ONE);
-        const res = groupHandler.handleShowGroups(groups, "COURSE_ONE");
-        return await this.bot.sendMessage(chatId, res.text, res.buttons);
+      if (text === "Изменить") {
+        const res = groupHandler.handleSelectCourse(chatId);
+        return this.bot.sendMessage(chatId, res.text, res.buttons);
       }
 
-      if (text === "курс 2") {
-        const groups = await getSheetTitle(process.env.COURSE_TWO);
-        const res = groupHandler.handleShowGroups(groups, "COURSE_TWO");
-        return await this.bot.sendMessage(chatId, res.text, res.buttons);
+      if (text === "Расписание на сегодня") {
+        if (checkChatIdExists(chatId)) {
+          const user = findDataByChatId(chatId);
+
+          const today = new Date();
+
+          const daysOfWeek = [
+            "воскресенье",
+            "понедельник",
+            "вторник",
+            "среда",
+            "четверг",
+            "пятница",
+            "суббота",
+          ];
+
+          const dayIndex = today.getDay();
+          const dayName = daysOfWeek[dayIndex];
+          const dataSheets = await getSheetData(
+            user.detail.range,
+            user.detail.spreadsheetId,
+            dayName
+          );
+
+          return this.bot.sendMessage(
+            chatId,
+            formatRangeLesson(
+              user?.detail?.range,
+              user?.detail?.spreadsheetId,
+              dataSheets
+            ),
+            {
+              parse_mode: "HTML",
+              reply_markup: {
+                keyboard: getButtons(chatId),
+                resize_keyboard: true,
+              },
+            }
+          );
+        } else {
+          const res = groupHandler.handleSelectCourse(chatId);
+          return this.bot.sendMessage(chatId, res.text, res.buttons);
+        }
       }
 
-      if (text === "курс 3") {
-        const groups = await getSheetTitle(process.env.COURSE_THERE);
-        const res = groupHandler.handleShowGroups(groups, "COURSE_THERE");
-        return await this.bot.sendMessage(chatId, res.text, res.buttons);
-      }
+      if (text === "На этой неделе") {
+        if (checkChatIdExists(chatId)) {
+          const user = findDataByChatId(chatId);
+          const dataSheets = await getSheetData(
+            user.detail.range,
+            user.detail.spreadsheetId,
+            "all"
+          );
 
-      if (text === "курс 4") {
-        const groups = await getSheetTitle(process.env.COURSE_FOUR);
-        const res = groupHandler.handleShowGroups(groups, "COURSE_FOUR");
-        return await this.bot.sendMessage(chatId, res.text, res.buttons);
+          return this.bot.sendMessage(
+            chatId,
+            formatRangeLesson(
+              user?.detail?.range,
+              user?.detail?.spreadsheetId,
+              dataSheets
+            ),
+            {
+              parse_mode: "HTML",
+              reply_markup: {
+                keyboard: getButtons(chatId),
+                resize_keyboard: true,
+              },
+            }
+          );
+        }
       }
     });
   }
