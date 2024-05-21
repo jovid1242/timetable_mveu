@@ -2,6 +2,7 @@ node_modules/
 .idea
 .env
 config/config.json
+db/user.json
 
 yarn.lock
 package-lock.json

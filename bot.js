@@ -56,6 +56,10 @@ class Bot {
             formatRangeLesson(data[0], process.env[data[1]], dataSheets),
             {
               parse_mode: "HTML",
+              reply_markup: {
+                keyboard: getButtons(chatId),
+                resize_keyboard: true,
+              },
             }
           );
         }
