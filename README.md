@@ -37,7 +37,7 @@
 
 <ul style="font-size: 1.1em;">
   <li><strong>Node.js</strong> и <strong>Node-telegram-bot-api || Google-SpreadSheet</strong> — для управления ботом и взаимодействия с пользователем</li>
-  <li><strong>ExpressJs</strong> — для хранения данных о пользователях и расписании</li>
+  <li><strong>ExpressJs</strong></li>
   <li><strong>Telegram API</strong> — для интеграции с Telegram</li>
 </ul>
 
