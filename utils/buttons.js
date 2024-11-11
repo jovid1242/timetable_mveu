@@ -14,7 +14,7 @@ const BUTTONS = {
       },
       {
         text: "Численные методы",
-        web_app: { url: `${process.env.APP_URL}/dichotomy_method` },
+        web_app: { url: `${process.env.APP_URL}/dichotomy_method.html` },
       },
     ],
   ],
