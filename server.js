@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 
 const Bot = require("./bot");
-const getSheetData = require("./utils/getSheetData"); 
+const getSheetData = require("./utils/getSheetData");
 const PORT = process.env.PORT || 8112;
 
 const polling = process.env.APP_MODE === "local";
@@ -39,6 +39,10 @@ app.get("/group", async (req, res) => {
       error,
     });
   }
+});
+
+app.get("/dichotomy_method", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "dichotomy_method.html"));
 });
 
 app.listen(PORT, () => {

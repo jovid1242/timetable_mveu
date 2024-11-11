@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Метод дихотомии</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+      }
+      input,
+      button {
+        margin: 5px;
+      }
+      table {
+        margin-top: 20px;
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+      }
+
+      .row {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .rows {
+        width: 600px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      input {
+        height: 45px;
+        border-radius: 8px;
+        border: 1px solid #333;
+      }
+
+      .btn {
+        min-width: 180px;
+        height: 45px;
+        border: unset;
+        outline: unset;
+        background: #333;
+        color: #fff;
+        border-radius: 8px;
+        transition: 0.5s ease-in-out;
+        cursor: pointer;
+      }
+      .btn:hover {
+        transition: 0.5s ease-in-out;
+        box-shadow: 0 2px 16px #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Метод дихотомии</h1>
+
+      <span class="spn">Пример: (2*x**2 - 3*x + 1)</span>
+      <div class="rows">
+        <div class="row">
+          <label for="equation">Введите уравнение :</label>
+          <input
+            type="text"
+            id="equation"
+            placeholder="2*x**2 - 3*x + 1"
+            value="2*x**2 - 3*x + 1"
+          />
+        </div>
+        <div class="row">
+          <label for="tolerance">Точность:</label>
+          <input type="number" id="tolerance" step="0.0001" value="0.0001" />
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <label for="a">a:</label>
+          <input type="number" id="a" step="0.1" value="0" />
+        </div>
+        <div class="row">
+          <label for="b">b:</label>
+          <input type="number" id="b" step="0.1" value="Math.PI" />
+        </div>
+      </div>
+      <button onclick="solve()" class="btn">Рассчитать</button>
+
+      <table id="resultTable">
+        <thead>
+          <tr>
+            <th>Итерация</th>
+            <th>a</th>
+            <th>b</th>
+            <th>c</th>
+            <th>f(a)</th>
+            <th>f(b)</th>
+            <th>f(c)</th>
+            <th>f(a) * f(b)</th>
+            <th>f(b) * f(c)</th>
+            <th>Ответ</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <script>
+      function parseEquation(equation, x) {
+        return eval(equation); // Вычисляем значение уравнения с подставленным x
+      }
+
+      function bisectionMethod(
+        equation,
+        a,
+        b,
+        tolerance = 0.000001,
+        maxIterations = 1000
+      ) {
+        let results = [];
+        let iterations = 0;
+        let c;
+
+        while ((b - a) / 2 > tolerance && iterations < maxIterations) {
+          c = (a + b) / 2;
+          const fa = parseEquation(equation, a); // Вычисляем f(a)
+          const fb = parseEquation(equation, b);
+          const fc = parseEquation(equation, c);
+
+          results.push({
+            iteration: iterations + 1,
+            a: a,
+            b: b,
+            c: c,
+            fa: fa,
+            fb: fb,
+            fc: fc,
+            fa_fb: fa * fb,
+            fb_fc: fb * fc,
+            answer: c,
+          });
+
+          if (Math.abs(fc) < tolerance) break;
+
+          if (fa * fc < 0) {
+            b = c;
+          } else if (fc * fb < 0) {
+            a = c;
+          } else {
+            break;
+          }
+
+          iterations++;
+        }
+
+        return results;
+      }
+
+      function solve() {
+        const equation = document.getElementById("equation").value;
+        const a = parseFloat(document.getElementById("a").value);
+        const b = parseFloat(document.getElementById("b").value);
+        const tolerance = parseFloat(
+          document.getElementById("tolerance").value
+        );
+
+        if (isNaN(a) || isNaN(b) || isNaN(tolerance) || !equation) {
+          alert("Пожалуйста, заполните все поля правильно.");
+          return;
+        }
+
+        try {
+          const results = bisectionMethod(equation, a, b, tolerance);
+          displayResults(results);
+        } catch (error) {
+          alert("Ошибка при вычислении: " + error.message);
+        }
+      }
+
+      function displayResults(results) {
+        const tbody = document
+          .getElementById("resultTable")
+          .querySelector("tbody");
+        tbody.innerHTML = "";
+
+        results.forEach((result) => {
+          const row = document.createElement("tr");
+
+          Object.values(result).forEach((value, index) => {
+            const cell = document.createElement("td");
+
+            if (index === 9) {
+              cell.textContent = value.toFixed(4);
+            } else {
+              cell.textContent = value.toFixed(3);
+            }
+            row.appendChild(cell);
+          });
+
+          tbody.appendChild(row);
+        });
+      }
+    </script>
+  </body>
+</html>
