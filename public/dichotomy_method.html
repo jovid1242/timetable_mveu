@@ -96,11 +96,11 @@
       <div class="rows">
         <div class="row">
           <label for="a">a:</label>
-          <input type="text" id="a" step="0.1" value="0" />
+          <input type="number" id="a" step="0.1" value="-1" />
         </div>
         <div class="row">
           <label for="b">b:</label>
-          <input type="text" id="b" step="0.1" value="Math.PI" />
+          <input type="number" id="b" step="0.1" value="0.75" />
         </div>
       </div>
       <button onclick="solve()" class="btn">Рассчитать</button>
@@ -177,8 +177,8 @@
 
       function solve() {
         const equation = document.getElementById("equation").value;
-        const a = parseFloat(Number(document.getElementById("a").value));
-        const b = parseFloat(Number(document.getElementById("b").value));
+        const a = parseFloat(document.getElementById("a").value);
+        const b = parseFloat(document.getElementById("b").value);
         const tolerance = parseFloat(
           document.getElementById("tolerance").value
         );
