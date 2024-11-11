@@ -177,8 +177,8 @@
 
       function solve() {
         const equation = document.getElementById("equation").value;
-        const a = parseFloat(document.getElementById("a").value);
-        const b = parseFloat(document.getElementById("b").value);
+        const a = parseFloat(Number(document.getElementById("a").value));
+        const b = parseFloat(Number(document.getElementById("b").value));
         const tolerance = parseFloat(
           document.getElementById("tolerance").value
         );
