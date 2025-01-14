@@ -21,6 +21,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/group", async (req, res) => {
+  console.log("req.query", req.query);
+
   try {
     const { range, spreadsheetId, day } = req.query;
     const data = await getSheetData(range, spreadsheetId, day);
