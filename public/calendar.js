@@ -35,7 +35,9 @@ function loadSchedule() {
   var spreadsheetId = urlParams.get("spreadsheetId");
   var day = urlParams.get("day") || "all";
 
-  fetch(`/group?range=${range}&spreadsheetId=${spreadsheetId}&day=${day}`)
+  fetch(
+    `https://classschedule.okchina.co/group?range=${range}&spreadsheetId=${spreadsheetId}&day=${day}`
+  )
     .then((response) => response.json())
     .then((data) => {
       const schedule = document.querySelector(".schedule");
