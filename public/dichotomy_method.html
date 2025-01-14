@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Метод дихотомии</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
       body {
         font-family: Arial, sans-serif;
+        background: #fff;
       }
       .container {
         max-width: 800px;
@@ -91,11 +96,11 @@
       <div class="rows">
         <div class="row">
           <label for="a">a:</label>
-          <input type="number" id="a" step="0.1" value="0" />
+          <input type="number" id="a" step="0.1" value="-1" />
         </div>
         <div class="row">
           <label for="b">b:</label>
-          <input type="number" id="b" step="0.1" value="Math.PI" />
+          <input type="number" id="b" step="0.1" value="0.75" />
         </div>
       </div>
       <button onclick="solve()" class="btn">Рассчитать</button>
